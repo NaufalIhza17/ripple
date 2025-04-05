@@ -1,14 +1,22 @@
 "use client";
 
 import React from "react";
+import { useRouter } from "next/navigation"; // Import `useRouter` for redirection
 import { signInWithPopup } from "firebase/auth";
 import { auth, googleProvider, appleProvider } from "../lib/firebase";
 
 const FirebaseButtons: React.FC = () => {
+  const router = useRouter();
+
   const handleGoogleLogin = async () => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
       console.log("Google user:", result.user);
+      const isValid = await verifyToken(result.user);
+      if (isValid) {
+        saveUserToBackend(result.user);
+        router.push("/pages/self-auth");
+      }
     } catch (error) {
       console.error("Google login error:", error);
     }
@@ -18,17 +26,54 @@ const FirebaseButtons: React.FC = () => {
     try {
       const result = await signInWithPopup(auth, appleProvider);
       console.log("Apple user:", result.user);
+      const isValid = await verifyToken(result.user);
+      if (isValid) {
+        saveUserToBackend(result.user);
+        router.push("/dashboard");
+      }
     } catch (error) {
       console.error("Apple login error:", error);
     }
   };
 
+  const verifyToken = async (user: any) => {
+    const token = await user.getIdToken();
+    const response = await fetch("/api/auth/verify", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await response.json();
+    if (data.message === "Token is valid") {
+      return true;
+    } else {
+      console.error("Token is invalid:", data.message);
+      return false;
+    }
+  };
+
+  const saveUserToBackend = async (user: any) => {
+    const token = await user.getIdToken();
+
+    await fetch("/api/save-user", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        email: user.email,
+        name: user.displayName || "Unknown",
+      }),
+    });
+  };
+
   return (
-    <div className="flex items-center gap-4 p-5 border w-fit h-fit">
-      <button
-        onClick={handleGoogleLogin}
-        className="bg-white p-2  border"
-      >
+    <div className="flex justify-center items-center gap-4 p-5 border w-fit h-fit main-gradient min-w-[200px]">
+      <button onClick={handleGoogleLogin} className="p-2 border">
         <svg
           width="32px"
           height="32px"
@@ -63,7 +108,7 @@ const FirebaseButtons: React.FC = () => {
         </svg>
       </button>
       <p>or</p>
-      <button onClick={handleAppleLogin} className="bg-white p-2  border">
+      <button onClick={handleAppleLogin} className="p-2 border">
         <svg
           width="32px"
           height="32px"

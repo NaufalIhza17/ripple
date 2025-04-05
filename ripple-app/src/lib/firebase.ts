@@ -4,13 +4,13 @@ import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
-  apiKey: process.env.APP_FIREBASE_API_KEY,
-  authDomain: process.env.APP_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.APP_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.APP_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.APP_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.APP_FIREBASE_APP_ID,
-  measurementId: process.env.APP_FIREBASE_MEASUREMENT_ID
+  apiKey: 'AIzaSyAoK3lX2PFBfcYz2u__BhWdCJjZEzEKEUw',
+  authDomain: 'ripple-e4529.firebaseapp.com',
+  projectId: 'ripple-e4529',
+  storageBucket: 'ripple-e4529.firebasestorage.app',
+  messagingSenderId: '288402236026',
+  appId: '1:288402236026:web:5f5cbf40c19cc18044d1c3',
+  measurementId: 'G-FVEH41G8VL'
 };
 
 const app = initializeApp(firebaseConfig);
