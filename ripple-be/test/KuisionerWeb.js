@@ -12,10 +12,10 @@ const PRIZE = 1
 
 describe("KuisionerWeb", () => {
   let kuisionerweb;
-  let deployer;
+  let deployer, winner;
 
   beforeEach(async () => {
-    [deployer] = await ethers.getSigners();
+    [deployer, winner] = await ethers.getSigners();
     const KuisionerWeb = await ethers.getContractFactory("KuisionerWeb");
     kuisionerweb = await KuisionerWeb.deploy();
   });
@@ -50,4 +50,28 @@ describe("KuisionerWeb", () => {
         expect(transaction).to.emit(kuisionerweb, "List")
     })
   });
-});
+
+  describe("Winning", () => {
+    let transaction
+    beforeEach(async ()=> {
+        transaction = await kuisionerweb.connect(deployer).list()
+        await transaction.wait()
+
+        transaction = await kuisionerweb.connect(winner).win(ID, { value: PRIZE})
+    })
+    it("Updates the contract balance", async () => {
+        const result = await ethers.provider.getBalance(kuisionerweb.address)
+        expect(result).to.equal(COST)
+    })
+    it("Updates winner's order count", async () => {
+        const result = await kuisionerweb.connect(winner.address)
+        expect(result.orderCount).to.equal(1)
+  })
+  it("Adds the order", async () => {
+    const order = await kuisionerweb.orders(winner.address, 1)
+
+    expect(order.time).to.be.greaterThan(0)
+    expect(order.item.name).to.equal(NAME)
+  })
+})
+})
