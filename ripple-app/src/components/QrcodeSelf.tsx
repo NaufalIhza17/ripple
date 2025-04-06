@@ -4,17 +4,19 @@ import React, { useState, useEffect } from "react";
 import SelfQRcodeWrapper, { SelfAppBuilder } from "@selfxyz/qrcode";
 import { v4 as uuidv4 } from "uuid";
 
-function QRCodeSelf() {
+interface QRCodeSelfProps {
+  onSuccess: (isVerified: boolean) => void; // Add onSuccess prop
+}
+
+function QRCodeSelf({ onSuccess }: QRCodeSelfProps) {
   const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    // Generate a user ID when the component mounts
     setUserId(uuidv4());
   }, []);
 
   if (!userId) return null;
 
-  // Create the SelfApp configuration
   const selfApp = new SelfAppBuilder({
     appName: "ripple",
     scope: "ripple-scope",
@@ -27,9 +29,8 @@ function QRCodeSelf() {
       <SelfQRcodeWrapper
         selfApp={selfApp}
         onSuccess={() => {
-          // Handle successful verification
           console.log("Verification successful!");
-          // Redirect or update UI
+          onSuccess(true);
         }}
         size={300}
       />
